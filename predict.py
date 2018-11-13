@@ -32,29 +32,32 @@ def process_image(image):
     '''
     
     # TODO: Process a PIL image for use in a PyTorch model   
-    new_size = [0, 0]
+    size = 224
 
-    if image.size[0] > image.size[1]:
-        image.thumbnail((10000, 256))
+    width, height = image.size
+    if height > width:
+        height = int(max(height * size / width, 1))
+        width = int(size)
     else:
-        image.thumbnail((256, 10000))
+        width = int(max(width * size / height, 1))
+        height = int(size)
 
-    width, height = image.size  
+    resized_image = image.resize((width, height))
 
-    left = (256 - 224)/2
-    top = (256 - 224)/2
-    right = (256 + 224)/2
-    bottom = (256 + 224)/2
+    left = (width - size)/2
+    top = (height - size)/2
+    right = left + size
+    bottom = top + size
 
     image = image.crop((left, top, right, bottom))
-    
+
     image = np.array(image)/255
     mean = np.array([0.485, 0.456, 0.406])
     std = np.array([0.229, 0.224, 0.225])
     image = (image - mean) / std
-    
+
     image = np.transpose(image, (2, 0, 1))
-    
+
     return image
 
 def predict(image_path, model, topk, gpu):

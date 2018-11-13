@@ -17,7 +17,7 @@ import time
 
 def do_deep_learning(args, epochs, criterion, cuda=True):
     dataloaders, image_datasets = initialize_data(args.data_dir)
-    model = build_network(args.arch)
+    model = build_network(args.arch, args.hidden_units)
     optimizer = optim.SGD(model.classifier.parameters(), lr=float(args.learning_rate))
     if cuda:
         model.cuda()
@@ -75,18 +75,22 @@ def do_deep_learning(args, epochs, criterion, cuda=True):
     print("\nTotal time: {:.0f}m {:.0f}s".format(time_elapsed//60, time_elapsed % 60))
     save_checkpoint(model, args, image_datasets)
     
-def build_network(arch):
+def build_network(arch, hidden_units):
     model = getattr(models, arch)(pretrained=True)
 
     for param in model.parameters():
         param.requires_grad = False
 
-    feature_num = model.classifier[0].in_features
+    if (arch == 'vgg19'):
+        feature_num = model.classifier[0].in_features
+    else:
+        feature_num = model.classifier.in_features
+
     classifier = nn.Sequential(OrderedDict([
-                              ('fc1', nn.Linear(feature_num, 1024)),
+                              ('fc1', nn.Linear(feature_num, int(hidden_units))),
                               ('drop', nn.Dropout(p=0.5)),
                               ('relu', nn.ReLU()),
-                              ('fc2', nn.Linear(1024, 102)),
+                              ('fc2', nn.Linear(int(hidden_units), 102)),
                               ('output', nn.LogSoftmax(dim=1))
                               ]))
 
@@ -134,8 +138,8 @@ def save_checkpoint(model, args, image_datasets):
         'arch': args.arch,
         'classifier' : model.classifier,
         'state_dict': model.state_dict(),
-        'epochs': epochs,
-        'learning_rate': 0.01,
+        'epochs': args.epochs,
+        'learning_rate': args.learning_rate,
         'class_to_idx': model.class_to_idx
     }
 
@@ -144,7 +148,7 @@ def save_checkpoint(model, args, image_datasets):
 def arg_parser():
     parser = argparse.ArgumentParser(description="Training")
     parser.add_argument('--data_dir', action='store')
-    parser.add_argument('--arch', dest='arch', default='vgg19', choices=['vgg13', 'vgg19'])
+    parser.add_argument('--arch', dest='arch', default='vgg19', choices=['densenet121', 'vgg19'])
     parser.add_argument('--learning_rate', dest='learning_rate', default='0.01')
     parser.add_argument('--hidden_units', dest='hidden_units', default='512')
     parser.add_argument('--epochs', dest='epochs', default='10')
