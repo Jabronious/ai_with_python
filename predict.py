@@ -18,11 +18,11 @@ import time
 
 def load_checkpoint(filepath):
     checkpoint = torch.load(filepath)
-    model.epochs = checkpoint['epochs']
     model = getattr(torchvision.models, checkpoint['arch'])(pretrained=True)
     model.classifier = checkpoint['classifier']
     model.load_state_dict(checkpoint['state_dict'])
     model.class_to_idx = checkpoint['class_to_idx']
+    model.epochs = checkpoint['epochs']
     
     return model
 
