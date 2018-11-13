@@ -134,6 +134,8 @@ def save_checkpoint(model, args, image_datasets):
         'arch': args.arch,
         'classifier' : model.classifier,
         'state_dict': model.state_dict(),
+        'epochs': epochs,
+        'learning_rate': 0.01,
         'class_to_idx': model.class_to_idx
     }
 
@@ -142,15 +144,16 @@ def save_checkpoint(model, args, image_datasets):
 def arg_parser():
     parser = argparse.ArgumentParser(description="Training")
     parser.add_argument('--data_dir', action='store')
-    parser.add_argument('--arch', dest='arch', default='vgg19')
+    parser.add_argument('--arch', dest='arch', default='vgg19', choices=['vgg13', 'vgg19'])
     parser.add_argument('--learning_rate', dest='learning_rate', default='0.01')
     parser.add_argument('--hidden_units', dest='hidden_units', default='512')
     parser.add_argument('--epochs', dest='epochs', default='10')
     parser.add_argument('--gpu', action="store_true", default=True)
     return parser.parse_args()
 
-args = arg_parser()
-criterion = nn.CrossEntropyLoss()
-epochs = int(args.epochs)
-cuda = True if torch.cuda.is_available() and args.gpu else False
-do_deep_learning(args, epochs, criterion, cuda)
+if __name__ == “__main__”:
+    args = arg_parser()
+    criterion = nn.CrossEntropyLoss()
+    epochs = int(args.epochs)
+    cuda = True if torch.cuda.is_available() and args.gpu else False
+    do_deep_learning(args, epochs, criterion, cuda)

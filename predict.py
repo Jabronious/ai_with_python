@@ -18,6 +18,7 @@ import time
 
 def load_checkpoint(filepath):
     checkpoint = torch.load(filepath)
+    model.epochs = checkpoint['epochs']
     model = getattr(torchvision.models, checkpoint['arch'])(pretrained=True)
     model.classifier = checkpoint['classifier']
     model.load_state_dict(checkpoint['state_dict'])
@@ -101,14 +102,15 @@ def arg_parser():
     parser.add_argument('--gpu', action='store_true', default=True)
     return parser.parse_args()
 
-args = arg_parser()
-cat_to_name = {}
-with open(args.category_names, 'r') as f:
-    cat_to_name = json.load(f)
-model = load_checkpoint(args.checkpoint)
+if __name__ == “__main__”:
+    args = arg_parser()
+    cat_to_name = {}
+    with open(args.category_names, 'r') as f:
+        cat_to_name = json.load(f)
+    model = load_checkpoint(args.checkpoint)
 
-prob, classes = predict(args.filepath, model, int(args.top_k), args.gpu)
+    prob, classes = predict(args.filepath, model, int(args.top_k), args.gpu)
 
-for x in range(len(classes)):
-    print("{}.{}:".format(x+1, cat_to_name[classes[x]]),
-                      "{:.1f}%".format(prob[x]*100))
+    for x in range(len(classes)):
+        print("{}.{}:".format(x+1, cat_to_name[classes[x]]),
+                          "{:.1f}%".format(prob[x]*100))
