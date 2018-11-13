@@ -102,7 +102,7 @@ def arg_parser():
     parser.add_argument('--gpu', action='store_true', default=True)
     return parser.parse_args()
 
-if __name__ == “__main__”:
+if __name__ == "__main__":
     args = arg_parser()
     cat_to_name = {}
     with open(args.category_names, 'r') as f:

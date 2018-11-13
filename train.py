@@ -151,7 +151,7 @@ def arg_parser():
     parser.add_argument('--gpu', action="store_true", default=True)
     return parser.parse_args()
 
-if __name__ == “__main__”:
+if __name__ == "__main__":
     args = arg_parser()
     criterion = nn.CrossEntropyLoss()
     epochs = int(args.epochs)
